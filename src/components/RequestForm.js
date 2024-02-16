@@ -475,7 +475,7 @@ function RequestForm() {
                       <div className="row">
                         <div className="col-md">
                           <label>Aadhar Card</label>
-                          <input
+                          <Field
                             type="file"
                             name="aadharCardFile"
                             className="form-control"
@@ -513,7 +513,7 @@ function RequestForm() {
                           </div>
                           <div className="col-md">
                             <label>Upload PassPort</label>
-                            <input
+                            <Field
                               type="file"
                               name="passportFile"
                               className="form-control"
@@ -521,7 +521,7 @@ function RequestForm() {
                           </div>
                           <div className="col-md">
                             <label>Upload Visa</label>
-                            <input
+                            <Field
                               type="file"
                               name="visaFile"
                               className="form-control"
