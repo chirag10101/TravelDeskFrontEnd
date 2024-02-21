@@ -5,7 +5,9 @@ import * as Yup from "yup";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useUserContext } from "../UserContext";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
 
 
 async function GetAllLocations(setLocations) {
@@ -62,9 +64,10 @@ async function GetManagers(setManagers) {
   return response.data;
 }
 
-
 async function GetDepartmentById(id) {
-  const response = await axios.get("http://localhost:26429/api/department/"+id);
+  const response = await axios.get(
+    "http://localhost:26429/api/department/" + id
+  );
   console.log("Get department by ");
   console.log(response.data);
   return response.data;
@@ -75,146 +78,165 @@ async function GetDepartments(setDepartments) {
   return response.data;
 }
 
-
-async function AddToRequest(requestValues) {
+async function AddToRequest(requestValues , navigate) {
   debugger;
   var commonValues = {
-      userId : parseInt(requestValues.employeeId),
-      reasonForTravelling : requestValues.reasonForTravelling,
-      bookingTypeId : parseInt(requestValues.bookingTypeId),
-      projectId : parseInt(requestValues.projectId),
-      managerId : parseInt(requestValues.managerId),
-      departmentId : parseInt(requestValues.departmentId),
-      createdBy : parseInt(requestValues.employeeId),
-      aadharNo: requestValues.aadharNo,
-  }
-  if(requestValues.bookingTypeId=="1"){
+    userId: parseInt(requestValues.employeeId),
+    reasonForTravelling: requestValues.reasonForTravelling,
+    bookingTypeId: parseInt(requestValues.bookingTypeId),
+    projectId: parseInt(requestValues.projectId),
+    managerId: parseInt(requestValues.managerId),
+    departmentId: parseInt(requestValues.departmentId),
+    createdBy: parseInt(requestValues.employeeId),
+    aadharNo: requestValues.aadharNo,
+  };
+  if (requestValues.bookingTypeId == "1") {
     var temp = {
       ...commonValues,
-      flightTypeId : parseInt(requestValues.flightTypeId),
+      flightTypeId: parseInt(requestValues.flightTypeId),
       to: parseInt(requestValues.toLocationId),
       from: parseInt(requestValues.fromLocationId),
-      passportNo : requestValues.passportNo,
-      flightDate : requestValues.flightDate,
-      createdBy: parseInt(requestValues.employeeId)
+      passportNo: requestValues.passportNo,
+      flightDate: requestValues.flightDate,
+      createdBy: parseInt(requestValues.employeeId),
     };
   }
 
-  if(requestValues.bookingTypeId=="2"){
+  if (requestValues.bookingTypeId == "2") {
     var temp = {
       ...commonValues,
-      numberOfDays : requestValues.numberOfDays,
-      stayDate : requestValues.hotelDate,
-      mealTypeId : parseInt(requestValues.mealTypeId),
-      hotelLocationId : parseInt(requestValues.hotelLocationId),
-      mealPreferenceId : parseInt(requestValues.mealPreferenceId),
-      createdBy: parseInt(requestValues.employeeId)
+      numberOfDays: requestValues.numberOfDays,
+      stayDate: requestValues.hotelDate,
+      mealTypeId: parseInt(requestValues.mealTypeId),
+      hotelLocationId: parseInt(requestValues.hotelLocationId),
+      mealPreferenceId: parseInt(requestValues.mealPreferenceId),
+      createdBy: parseInt(requestValues.employeeId),
     };
   }
 
-  if(requestValues.bookingTypeId=="3"){
+  if (requestValues.bookingTypeId == "3") {
     var temp = {
       ...commonValues,
       to: parseInt(requestValues.toLocationId),
       from: parseInt(requestValues.fromLocationId),
-      passportNo : requestValues.passportNo,
-      flightDate : requestValues.flightDate,
-      numberOfDays : requestValues.numberOfDays,
-      stayDate : requestValues.hotelDate,
-      flightTypeId : parseInt(requestValues.flightTypeId1),
-      mealTypeId : parseInt(requestValues.mealTypeId),
-      hotelLocationId : parseInt(requestValues.hotelLocationId),
-      mealPreferenceId : parseInt(requestValues.mealPreferenceId),
-      createdBy: parseInt(requestValues.employeeId)
+      passportNo: requestValues.passportNo,
+      flightDate: requestValues.flightDate,
+      numberOfDays: requestValues.numberOfDays,
+      stayDate: requestValues.hotelDate,
+      flightTypeId: parseInt(requestValues.flightTypeId1),
+      mealTypeId: parseInt(requestValues.mealTypeId),
+      hotelLocationId: parseInt(requestValues.hotelLocationId),
+      mealPreferenceId: parseInt(requestValues.mealPreferenceId),
+      createdBy: parseInt(requestValues.employeeId),
     };
   }
 
-  const result = await axios.post("http://localhost:26429/api/travelrequest/addtorequest", JSON.stringify(temp), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if(result.status == 200){
-    console.log("Request Added Successfully");
-  }
-  
-}
-
-
-async function UploadFiles(requestValues) {
-  debugger;
-  const formData = new FormData();
-  alert(requestValues.aadharCardFile);
-    formData.append("aadharCardFile",requestValues.aadharCardFile);
-    console.log(requestValues.aadharCardFile);
-    alert(requestValues.passportFile);
-    if(requestValues.passportFile!=null){
-      formData.append("passportFile",requestValues.passportFile);
+  const result = await axios.post(
+    "http://localhost:26429/api/travelrequest/addtorequest",
+    JSON.stringify(temp),
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
     }
-    alert(requestValues.passportFile);
-    if(requestValues.visaFile!=null){
-      formData.append("visaFile",requestValues.visaFile);
-    }
-  console.log(formData);
-  const result = await axios.post("http://localhost:26429/api/travelrequest/upload",  {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    data: formData
-  });
-  if(result.status == 200){
+  );
+  if (result.status == 200) {
+    toast.success('Request added successfully', {
+      position: "top-center",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      
+      });
+      setTimeout(async () => {
+        navigate('/requesthistory');
+      }, 1500); 
     console.log("Request Added Successfully");
+
   }
-  
 }
 
 // async function UploadFiles(requestValues) {
 //   debugger;
 //   const formData = new FormData();
-//   formData.append("aadharCardFile", requestValues.aadharCardFile);
-//   console.log(requestValues.aadharCardFile);
-  
-//   if (requestValues.passportFile != null) {
-//     formData.append("passportFile", requestValues.passportFile);
-//   }
-  
-//   if (requestValues.visaFile != null) {
-//     formData.append("visaFile", requestValues.visaFile);
-//   }
-
-//   console.log(formData);
-
-//   try {
-//     const response = await fetch("http://localhost:26429/api/travelrequest/upload", {
-//       method: 'POST',
-//       body: formData,
-//     });
-
-//     if (response.ok) {
-//       console.log("Request Added Successfully");
-//     } else {
-//       console.error("Error uploading files:", response.statusText);
+//   alert(requestValues.aadharCardFile);
+//     formData.append("aadharCardFile",requestValues.aadharCardFile);
+//     console.log(requestValues.aadharCardFile);
+//     alert(requestValues.passportFile);
+//     if(requestValues.passportFile!=null){
+//       formData.append("passportFile",requestValues.passportFile);
 //     }
-//   } catch (error) {
-//     console.error("Network error:", error.message);
+//     alert(requestValues.passportFile);
+//     if(requestValues.visaFile!=null){
+//       formData.append("visaFile",requestValues.visaFile);
+//     }
+//   console.log(formData);
+//   const result = await axios.post("http://localhost:26429/api/travelrequest/upload",  {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     }
+//     ,
+//     data : formData
+//   });
+//   if(result.status == 200){
+//     console.log("Request Added Successfully");
 //   }
+
 // }
 
+async function UploadFiles(requestValues) {
+  debugger;
+  const formData = new FormData();
+  console.log(typeof requestValues.aadharCardFile);
+  formData.append("aadharCardFile", requestValues.aadharCardFile);
+  console.log(requestValues.aadharCardFile);
+
+  if (requestValues.passportFile != null) {
+    formData.append("passportFile", requestValues.passportFile);
+  }
+
+  if (requestValues.visaFile != null) {
+    formData.append("visaFile", requestValues.visaFile);
+  }
+
+  console.log(formData);
+
+  try {
+    const response = await fetch(
+      "http://localhost:26429/api/travelrequest/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (response.ok) {
+      console.log("Request Added Successfully");
+    } else {
+      console.error("Error uploading files:", response.statusText);
+    }
+  } catch (error) {
+    console.error("Network error:", error.message);
+  }
+}
 
 function RequestForm() {
-  const {decodedToken,setDecodedToken} = useUserContext();
+  const { decodedToken, setDecodedToken } = useUserContext();
   const [locations, setLocations] = useState([]);
   const [projects, setProjects] = useState([]);
   const [bookingTypes, setBookingTypes] = useState([]);
   const [flightTypes, setFlightTypes] = useState([]);
   const [mealtypes, setMealTypes] = useState([]);
-  const [mealPreferences , setMealPreferences] = useState([]);
+  const [mealPreferences, setMealPreferences] = useState([]);
   const [managers, setManagers] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-   
-
     async function fetchData() {
       // Fetch data here
       GetAllLocations(setLocations);
@@ -224,7 +246,7 @@ function RequestForm() {
       GetAllMealPreferences(setMealPreferences);
       GetAllMealTypes(setMealTypes);
       GetManagers(setManagers);
-       GetDepartments(setDepartments);
+      GetDepartments(setDepartments);
     }
     fetchData();
     // eslint-disable-next-line
@@ -232,38 +254,55 @@ function RequestForm() {
   //console.log(locations);
 
   const validationSchema = Yup.object().shape({
-    employeeId: Yup.string()
-      .matches(/^\d+$/, "Employee ID must be a valid")
-      .required("Employee ID is required"),
-
-    employeeName: Yup.string()
-      .matches(/^[a-zA-Z ]*$/, "Invalid Employee Name")
-      .required("Employee Name is required"),
-
-    projectName: Yup.string()
-      .matches(/^\d+$/, "Invalid Project Name")
-      .required("Project Name is required"),
-
-    departmentName: Yup.string().required("Department Name is required"),
-    reasonForTravelling: Yup.string().required("Reason for Travel is required"),
-    // bookingType: Yup.string().required('Type of Booking is required'),
-
-    // flightType: Yup.string().when("bookingType", {
-    //   is: "ticket only",
-    //   then: Yup.string().required("Flight Type is required"),
-    // }),
-    // aadhaarCard: Yup.mixed().when("flightType", {
-    //   is: "domestic flight",
-    //   then: Yup.mixed().required("Aadhaar Card is required"),
-    // }),
+    reasonForTravelling: Yup.string().required("Reason is required"),
+    bookingTypeId: Yup.string().required("Select booking Type"),
+    projectId: Yup.string().required("Select Project"),
+    managerId: Yup.string().required("Select Manager"),
   });
 
-  
-  if (locations != null && decodedToken != null && decodedToken.firstName != null &&
-    decodedToken.lastName!= null && decodedToken.userId != null && decodedToken.departmentId != null) {
+  const [aadharCardFile, setAadharCardFile] = useState(null);
+  const [passportFile, setPassportFile] = useState(null);
+  const [visaFile, setVisaFile] = useState(null);
 
+  const handleAadharCardFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+
+    setAadharCardFile(selectedFile);
+  };
+
+  const handlePassportFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    setPassportFile(selectedFile);
+  };
+
+  const handleVisaFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+
+    setVisaFile(selectedFile);
+  };
+
+  if (
+    locations != null &&
+    decodedToken != null &&
+    decodedToken.firstName != null &&
+    decodedToken.lastName != null &&
+    decodedToken.userId != null &&
+    decodedToken.departmentId != null
+  ) {
     return (
       <div className="container my-3 p-2 rounded-4" id="requestformdivmaindiv">
+        <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        theme="light"
+/>
         <div className="ms-4 mt-3">
           <h1>Request for Travel</h1>
         </div>
@@ -271,15 +310,15 @@ function RequestForm() {
         <Formik
           initialValues={{
             employeeId: decodedToken.userId,
-            employeeName:  decodedToken.firstName + " " + decodedToken.lastName,
+            employeeName: decodedToken.firstName + " " + decodedToken.lastName,
             projectId: "",
-            departmentId: parseInt(decodedToken.departmentId) ,
+            departmentId: parseInt(decodedToken.departmentId),
             reasonForTravelling: "",
             bookingTypeId: "",
             toLocationId: null,
             fromLocationId: null,
-            flightTypeId:null,
-            flightTypeId1:null,
+            flightTypeId: null,
+            flightTypeId1: null,
             aadharNo: "",
             flightDate: null,
             passportNo: null,
@@ -287,19 +326,52 @@ function RequestForm() {
             numberOfDays: null,
             mealTypeId: null,
             mealPreferenceId: null,
-            hotellocationId:null,
-            aadharCardFile: null,
-            passportFile: null,
-            visaFile: null,
+            hotellocationId: null,
           }}
           onSubmit={(values) => {
-            AddToRequest(values);
-            UploadFiles(values);
+            debugger;
+            AddToRequest(values, navigate);
+
+            const formData = new FormData();
+            console.log(typeof aadharCardFile);
+            formData.append("aadharCardFile", aadharCardFile);
+
+            if (passportFile != null) {
+              formData.append("passportFile", passportFile);
+            }
+
+            if (visaFile != null) {
+              formData.append("visaFile", visaFile);
+            }
+            // formData.append(
+            //   "emplyeeName",
+            //   decodedToken.firstName + "_" + decodedToken.lastName
+            // );
+            // formData.append("userId", 3);
+
+            console.log(formData);
+
+            try {
+              const result = axios.post(
+                "http://localhost:26429/api/travelrequest/upload",
+                formData,
+                {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                }
+              );
+            } catch (error) {
+              console.error("Network error:", error.message);
+            }
           }}
-          //validationSchema={validationSchema}
+          validationSchema={validationSchema}
         >
-          {({ values }) => (
-            <div className="p-2 m-3" id="requestformdiv">
+          {({ values,errors, touched }) => (
+            <div
+              className="p-2 m-3 overflow-y-auto overflow-x-hidden"
+              id="requestformdiv"
+            >
               <Form className={styles.Form}>
                 <div className="row">
                   <div className="col-md">
@@ -354,7 +426,7 @@ function RequestForm() {
                       <option value="">Select option</option>
                       {departments.map((department) => (
                         <option value={department.departmentId}>
-                          {department.departmentName} 
+                          {department.departmentName}
                         </option>
                       ))}
                     </Field>
@@ -387,16 +459,23 @@ function RequestForm() {
                       className="form-select ms-0 m-1"
                     >
                       <option value="">Select Manager</option>
-                        {managers.map((manager) => (
-                          <option value={manager.userId}>
-                            {manager.userId}-{manager.firstName} {manager.lastName}
-                          </option>
-                        ))}
+                      {managers.map((manager) => (
+                        <option value={manager.userId}>
+                          {manager.userId}-{manager.firstName}{" "}
+                          {manager.lastName}
+                        </option>
+                      ))}
                     </Field>
+                    <ErrorMessage
+                      name="managerId"
+                      component="div"
+                      className={`${styles.error}`}
+                      style={{ color: "red" }}
+                    />
                   </div>
                 </div>
                 <div className="row">
-                        <div className="col-4">
+                  <div className="col-4">
                     <label className="mt-1">Type of Booking :</label>
                     <Field
                       as="select"
@@ -410,9 +489,14 @@ function RequestForm() {
                         </option>
                       ))}
                     </Field>
+                    <ErrorMessage
+                      name="bookingTypeId"
+                      component="div"
+                      className={`${styles.error}`}
+                      style={{ color: "red" }}
+                    />
                   </div>
                 </div>
-                
 
                 {/* airTicket only */}
 
@@ -475,10 +559,11 @@ function RequestForm() {
                       <div className="row">
                         <div className="col-md">
                           <label>Aadhar Card</label>
-                          <Field
+                          <input
                             type="file"
                             name="aadharCardFile"
                             className="form-control"
+                            onChange={handleAadharCardFileChange}
                           />
                         </div>
                         <div className="col-md">
@@ -510,21 +595,26 @@ function RequestForm() {
                               name="passportNo"
                               className="form-control "
                             />
+                            {errors.passportNo && touched.passportNo ? (
+                    <div className="text-danger">{errors.passportNo}</div>
+                  ) : null}
                           </div>
                           <div className="col-md">
                             <label>Upload PassPort</label>
-                            <Field
+                            <input
                               type="file"
                               name="passportFile"
                               className="form-control"
+                              onChange={handlePassportFileChange}
                             />
                           </div>
                           <div className="col-md">
                             <label>Upload Visa</label>
-                            <Field
+                            <input
                               type="file"
                               name="visaFile"
                               className="form-control"
+                              onChange={handleVisaFileChange}
                             />
                           </div>
                         </div>
@@ -539,10 +629,11 @@ function RequestForm() {
                           </div>
                           <div className="col-md">
                             <label>Aadhar Card</label>
-                            <Field
+                            <input
                               type="file"
                               name="aadharCardFile"
                               className="form-control"
+                              onChange={handleAadharCardFileChange}
                             />
                           </div>
                           <div className="col-md">
@@ -574,10 +665,11 @@ function RequestForm() {
                       </div>
                       <div className="col-md">
                         <label>Aadhar Card</label>
-                        <Field
+                        <input
                           type="file"
                           name="aadharCardFile"
                           className="form-control"
+                          onChange={handleAadharCardFileChange}
                         />
                       </div>
                       <div className="col-md">
@@ -613,7 +705,6 @@ function RequestForm() {
                             </option>
                           ))}
                         </Field>
-                        
                       </div>
 
                       <div className="col-md">
@@ -693,10 +784,11 @@ function RequestForm() {
                       <div className="row">
                         <div className="col-md">
                           <label>Aadhar Card</label>
-                          <Field
+                          <input
                             type="file"
                             name="aadharCardFile"
                             className="form-control"
+                            onChange={handleAadharCardFileChange}
                           />
                         </div>
                         <div className="col-md">
@@ -731,18 +823,20 @@ function RequestForm() {
                           </div>
                           <div className="col-md">
                             <label>Upload PassPort</label>
-                            <Field
+                            <input
                               type="file"
                               name="passportFile"
                               className="form-control"
+                              onChange={handlePassportFileChange}
                             />
                           </div>
                           <div className="col-md">
                             <label>Upload Visa</label>
-                            <Field
+                            <input
                               type="file"
                               name="visaFile"
                               className="form-control"
+                              onChange={handleVisaFileChange}
                             />
                           </div>
                         </div>

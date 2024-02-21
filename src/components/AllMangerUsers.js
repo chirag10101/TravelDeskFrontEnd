@@ -12,10 +12,11 @@ import { useUserContext } from "../UserContext";
 import { Modal, Button, Pagination } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 import "react-toastify/dist/ReactToastify.css";
 
-async function GetAllActiveUsers() {
-  const response = await axios.get("http://localhost:26429/api/user/active", {
+async function GetAllActiveUsers(currentUserId) {
+  const response = await axios.get("http://localhost:26429/api/user/ActiveUsersForManager/"+currentUserId, {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   });
   return response.data;
@@ -32,11 +33,12 @@ async function Delete(id, setUsers) {
   return response;
 }
 
-const AllUsers = () => {
+const AllManagerUsers = () => {
   const [users, setUsers] = useState([]);
   const [displayConfirmationModal, setDisplayConfirmationModal] =
     useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [currentUserId,setCurrentUserId] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(5); // Change the number of users per page here
   const { decodedToken, setDecodedToken } = useUserContext();
@@ -76,7 +78,11 @@ const AllUsers = () => {
   };
 
   useEffect(() => {
-    GetAllActiveUsers().then((data) => setUsers(data.reverse()));
+    var token = localStorage.getItem('token');
+    var dt = jwtDecode(token);
+    setCurrentUserId(parseInt(dt.userId)); //
+    setDecodedToken(dt);
+    GetAllActiveUsers(dt.userId).then((data) => setUsers(data.reverse()));
   }, []);
 
   // Logic for pagination
@@ -106,7 +112,6 @@ const AllUsers = () => {
         <table className="table table-striped table-hover table-info">
           <thead>
             <tr>
-              <th scope="col">Sl. No</th>
               <th scope="col">User Id</th>
               <th scope="col">First Name</th>
               <th scope="col">Last Name</th>
@@ -119,7 +124,6 @@ const AllUsers = () => {
           <tbody className="table-group-divider">
             {currentUsers.map((user) => (
               <tr key={user.userId}>
-                <td>{user.sl_No}</td>
                 <th scope="row">{user.userId}</th>
                 <td>{user.firstName}</td>
                 <td>{user.lastName}</td>
@@ -127,24 +131,14 @@ const AllUsers = () => {
                 <td>{user.mangerName}</td>
                 <td>{user.departmentName}</td>
                 <td>
-                  <button className="btn p-0">
-                    <FontAwesomeIcon
-                      icon={faPenToSquare}
-                      onClick={() => EditOnClick(user.userId)}
-                    />
-                  </button>
+                  
                   <button className="btn p-0 ms-3">
                     <FontAwesomeIcon
                       icon={faEye}
                       onClick={() => ViewOnClick(user.userId)}
                     />
                   </button>
-                  <button
-                    className="btn p-0 ms-3"
-                    onClick={() => showDeleteConfirmationModal(user.userId)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
+                 
                 </td>
               </tr>
             ))}
@@ -193,4 +187,4 @@ const AllUsers = () => {
   );
 };
 
-export default AllUsers;
+export default AllManagerUsers;

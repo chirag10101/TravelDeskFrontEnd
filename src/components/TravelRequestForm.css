@@ -1,8 +1,9 @@
 
 #requestformdivmaindiv{
     background-color: #ccc;
-
+    width : 90%;
 }
+
 
 
 input::-webkit-outer-spin-button,

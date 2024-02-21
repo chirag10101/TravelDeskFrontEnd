@@ -54,7 +54,7 @@ const DetailsUser = () => {
         <table class="table w-75 m-3">
           <thead>
             <tr>
-              <th scope="col" className="w-25">ID</th>
+              <th scope="col" className="w-25">User ID</th>
               <th scope="col">{user.userId}</th>
               <th scope="col"></th>
             </tr>

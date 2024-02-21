@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
@@ -52,26 +54,56 @@ const Login = () => {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        
+        //console.log(dt);
+        toast.success('LoggedIn successfully', {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        
+        });
+        setTimeout(async () => {
+          const result = await response.json();
         localStorage.setItem('token', result.token);
         const token = localStorage.getItem('token');
         //console.log(token);
         const dt = jwtDecode(token);
         setDecodedToken(dt);
-        //console.log(dt);
+          if(dt.role=="Admin"){
+            console.log(decodedToken);
+              navigate('/showusers');
+          }else if(dt.role=="Employee"){
+              navigate('/request');
+          }if(dt.role=="Manager"){
+            navigate('/viewallrequests')
+          }if(dt.role=="HRTravelAdmin"){
+            navigate('/viewallhrrequests')
+          }
+        }, 1500); 
         
-        if(dt.role=="Admin"){
-            
-        console.log(decodedToken);
-            navigate('/showusers');
-        }else{
-            navigate('/request');
-        }
       } else {
         console.error('Login failed');
+        toast.error('Wrong Email or Password', {
+          position: "top-center",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          
+          });
+        
       }
     } catch (error) {
       console.error('Error during login:', error);
+     
     }
   };
 
@@ -100,9 +132,23 @@ const Login = () => {
   };
 
   return (
-    <div>
-        <div className="background-image">
+    <div className='bg-info' id='loginForMainDiv'>
+      
+        <div className="background-image bg-info ">
+        
       <Container className='d-flex justify-content-center align-items-center  '>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        theme="light"
+/>
         <Row id="loginform">
           <Col  className="form-container">
             <div className="form-header"> Login </div>

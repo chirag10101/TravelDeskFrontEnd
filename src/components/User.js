@@ -4,28 +4,75 @@ import * as Yup from "yup";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-async function AddUser(user,navigate) {
-  var temp = JSON.stringify({
-    firstName: user.firstname,
-    lastName: user.lastname,
-    address: user.address,
-    mobileNumber: user.mobilenumber,
-    email: user.email,
-    password: user.password,
-    createdBy: 12,
-    isActive: true,
-    roleId: parseInt(user.role),
-    departmentId: parseInt(user.department),
-    managerId: parseInt(user.manager),
-  });
-  const result = axios.post("http://localhost:26429/api/user", temp, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  navigate('/showusers')
-  console.log(result);
+async function CheckEmailInUsers(email) {
+  try {
+      
+    const result = await axios.post(
+      "http://localhost:26429/api/user/checkemail?email="+ email,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    var res = await result.data;
+    if (res == true) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+
+async function AddUser(user, navigate) {
+  debugger;
+  var check = await CheckEmailInUsers(user.email);
+  if (check==true) {
+    alert("Email Already exists");
+  }else{
+    var temp = JSON.stringify({
+      firstName: user.firstname,
+      lastName: user.lastname,
+      address: user.address,
+      mobileNumber: user.mobilenumber,
+      email: user.email,
+      password: user.password,
+      createdBy: 12,
+      isActive: true,
+      roleId: parseInt(user.role),
+      departmentId: parseInt(user.department),
+      managerId: parseInt(user.manager),
+    });
+    const result = axios.post("http://localhost:26429/api/user", temp, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    toast.info('User Added successfully', {
+      position: "top-center",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      
+      }); 
+      setTimeout(async () => {
+        navigate("/showusers");
+        console.log(result);
+      }, 1500); 
+    
+  }
+
+  
 }
 
 async function GetRoles(setRoles) {
@@ -61,8 +108,9 @@ const UserSchema = Yup.object().shape({
     .min(2, "Too Short!")
     .max(200, "Too Long!")
     .required("Required"),
-  mobilenumber: Yup.string().required("Required")
-  .matches(/^(\+\d{1,3}[- ]?)?\d{10}$/,"Enter valid Mobile Number"),
+  mobilenumber: Yup.string()
+    .required("Required")
+    .matches(/^(\+\d{1,3}[- ]?)?\d{10}$/, "Enter valid Mobile Number"),
   email: Yup.string()
     .required("Required")
     .matches(
@@ -113,11 +161,11 @@ const User = () => {
       className="container-fluid d-flex justify-content-center align-items-center"
       id="main"
     >
-      <div className="w-50 p-4 bg-success-subtle m-4 rounded-4" id="formdiv">
-        <h1 className="text-center" id="adduserheading">
+      <div className="p-4 bg-success-subtle m-4 rounded-4" id="formdiv">
+        <h4 className="text-center" id="adduserheading">
           Add User
-        </h1>
-        <hr className="section-break-3" />
+        </h4>
+        <hr className="section-break-4 m-1" />
         <Formik
           initialValues={{
             firstname: "",
@@ -132,15 +180,14 @@ const User = () => {
           }}
           validationSchema={UserSchema}
           onSubmit={(values) => {
-            AddUser(values,navigate);
+            AddUser(values, navigate);
           }}
         >
           {({ errors, touched }) => (
             <Form>
               <div className="row">
-                <div className="form-group m-2 col">
-                  <label>
-                    <h6>First Name</h6>
+                <div className="form-group m-2  col">
+                  <label className="fw-medium">First Name
                   </label>
                   <Field
                     type="text"
@@ -153,9 +200,8 @@ const User = () => {
                     <div className="text-danger">{errors.firstname}</div>
                   ) : null}
                 </div>
-                <div className="form-group m-2 ms-0 col">
-                  <label>
-                    <h6>Last Name</h6>
+                <div className="form-group m-2 col">
+                  <label className="fw-medium">Last Name
                   </label>
                   <Field
                     type="text"
@@ -170,40 +216,78 @@ const User = () => {
                 </div>
               </div>
 
-              <div className="form-group m-2">
-                <label>
-                  <h6>Address</h6>
-                </label>
-                <Field
-                  as="textarea"
-                  className="form-control inputs border-1 border-info"
-                  id="addressInput"
-                  placeholder="Enter address"
-                  name="address"
-                ></Field>
-                {errors.address && touched.address ? (
-                  <div className="text-danger">{errors.address}</div>
-                ) : null}
+              <div className="row">
+                <div className="form-group m-2 mt-0 col">
+                  <label className="fw-medium">
+                    Address
+                  </label>
+                  <Field
+                    type="text"
+                    className="form-control inputs border-1 border-info"
+                    id="addressInput"
+                    placeholder="Enter address"
+                    name="address"
+                  ></Field>
+                  {errors.address && touched.address ? (
+                    <div className="text-danger">{errors.address}</div>
+                  ) : null}
+                </div>
+                <div className="form-group m-2 mt-0 col">
+                  <label className="fw-medium">Email
+                  </label>
+                  <Field
+                    type="text"
+                    className="form-control inputs border-1 border-info"
+                    name="email"
+                    id="emailInput"
+                    placeholder="Enter email"
+                  />
+                  {errors.email && touched.email ? (
+                    <div className="text-danger">{errors.email}</div>
+                  ) : null}
+                </div>
               </div>
-              <div className="form-group m-2">
-                <label>
-                  <h6>Mobile Number</h6>
-                </label>
-                <Field
-                  type="text"
-                  className="form-control inputs border-1 border-info"
-                  id="mobilenumberInput"
-                  placeholder="Enter mobile Number "
-                  name="mobilenumber"
-                />
-                {errors.mobilenumber && touched.mobilenumber ? (
-                  <div className="text-danger">{errors.mobilenumber}</div>
-                ) : null}
+
+              <div className="row">
+                <div className="form-group m-2 mt-0 col">
+                  <label className="fw-medium">Mobile Number
+                  </label>
+                  <Field
+                    type="text"
+                    className="form-control inputs border-1 border-info"
+                    id="mobilenumberInput"
+                    placeholder="Enter mobile Number "
+                    name="mobilenumber"
+                  />
+                  {errors.mobilenumber && touched.mobilenumber ? (
+                    <div className="text-danger">{errors.mobilenumber}</div>
+                  ) : null}
+                </div>
+                <div className="form-group m-2 mt-0 col">
+                  <label className="fw-medium">Manager
+                  </label>
+                  <Field
+                    as="select"
+                    id="select-manager"
+                    className="form-select  inputs border-1 border-info"
+                    name="manager"
+                  >
+                    <option value="">Select Manager</option>
+                    {managers.map((manager) => (
+                      <option value={manager.userId}>
+                        {manager.userId}-{manager.firstName} {manager.lastName}
+                      </option>
+                    ))}
+                  </Field>
+                  {errors.manager && touched.manager ? (
+                    <div className="text-danger">{errors.manager}</div>
+                  ) : null}
+                </div>
               </div>
-              <div className="form-group ms-0 me-0 p-0 m-2 row">
-                <div className="col ms-0">
-                  <label>
-                    <h6>Role</h6>
+
+              <div className="row">
+                <div className="col m-2 mt-0 form-group">
+                  <label className="fw-medium">Role
                   </label>
                   <Field
                     as="select"
@@ -225,9 +309,8 @@ const User = () => {
                     <div className="text-danger">{errors.role}</div>
                   ) : null}
                 </div>
-                <div className="col">
-                  <label>
-                    <h6>Department</h6>
+                <div className="col m-2 mt-0 form-group">
+                  <label className="fw-medium">Department
                   </label>
                   <Field
                     as="select"
@@ -247,90 +330,54 @@ const User = () => {
                   ) : null}
                 </div>
               </div>
-              <div className="form-group m-2">
-                <label>
-                  <h6>Manager</h6>
-                </label>
-                <Field
-                  as="select"
-                  id="select-manager"
-                  className="form-select  inputs border-1 border-info"
-                  name="manager"
-                >
-                  <option value="">Select Manager</option>
-                  {managers.map((manager) => (
-                    <option value={manager.userId}>
-                      {manager.userId}-{manager.firstName} {manager.lastName}
-                    </option>
-                  ))}
-                </Field>
-                {errors.manager && touched.manager ? (
-                  <div className="text-danger">{errors.manager}</div>
-                ) : null}
-              </div>
-              <div className="form-group m-2">
-                <label>
-                  <h6>Email</h6>
-                </label>
-                <Field
-                  type="text"
-                  className="form-control inputs border-1 border-info"
-                  name="email"
-                  id="emailInput"
-                  placeholder="Enter email"
-                />
-                {errors.email && touched.email ? (
-                  <div className="text-danger">{errors.email}</div>
-                ) : null}
-              </div>
-              <div className="form-group m-2">
-                <label>
-                  <h6>Password</h6>
-                </label>
 
-                <div className="d-flex align-items-center">
-                  <Field
-                    type={showPassword ? "text" : "password"}
-                    className="form-control inputs border-1 border-info "
-                    name="password"
-                    id="  passwordInput"
-                    placeholder="Enter password"
-                  />
-                  <i
-                    className="bi bi-eye-slash ms-3 me-2"
-                    id="togglePassword"
-                    onClick={() => handleShowPassword()}
-                  ></i>
+              <div className="row">
+                <div className="form-group m-2 mt-0 col">
+                  <label className=" fw-medium  ms-0">Password</label>
+                  <div className="position-relative">
+                    <Field
+                      type={showPassword ? "text" : "password"}
+                      className="form-control inputs border-1 border-secondary"
+                      name="password"
+                      id="passwordInput"
+                      placeholder="Enter password"
+                    />
+                    <i
+                      className="bi bi-eye-slash position-absolute end-0 top-50 translate-middle-y ms-3 me-2"
+                      id="togglePassword"
+                      onClick={() => handleShowPassword()}
+                    ></i>
+                  </div>
+
+                  {errors.password && touched.password ? (
+                    <div className="text-danger">{errors.password}</div>
+                  ) : null}
                 </div>
+                <div className="form-group m-2 mt-0 col">
+                  <label className="fw-medium ms-0">Confirm Password</label>
 
-                {errors.password && touched.password ? (
-                  <div className="text-danger">{errors.password}</div>
-                ) : null}
-              </div>
-              <div className="form-group m-2">
-                <label>
-                  <h6>Retype Password</h6>
-                </label>
-                <div className="d-flex align-items-center">
-                  <Field
-                    type={showPassword1 ? "text" : "password"}
-                    className="form-control inputs border-1 border-info "
-                    name="retypepassword"
-                    id="retypepasswordInput"
-                    placeholder="Enter password"
-                  />
-                  <i
-                    className="bi bi-eye-slash ms-3 me-2"
-                    onClick={() => handleShowPassword1()}
-                    id="togglePassword"
-                  ></i>
+                  <div className="position-relative">
+                    <Field
+                      type={showPassword1 ? "text" : "password"}
+                      className="form-control inputs border-1 border-secondary"
+                      name="retypepassword"
+                      id="retypepasswordInput"
+                      placeholder="Enter password"
+                    />
+                    <i
+                      className="bi bi-eye-slash position-absolute end-0 top-50 translate-middle-y ms-3 me-2"
+                      id="togglePassword"
+                      onClick={() => handleShowPassword1()}
+                    ></i>
+                  </div>
+
+                  {errors.retypepassword && touched.retypepassword ? (
+                    <div className="text-danger">{errors.retypepassword}</div>
+                  ) : null}
                 </div>
-
-                {errors.retypepassword && touched.retypepassword ? (
-                  <div className="text-danger">{errors.retypepassword}</div>
-                ) : null}
               </div>
-              <div className="d-flex justify-content-center mb-2 m-4">
+
+              <div className="d-flex justify-content-center mb-1   m-4">
                 <button type="submit" className="btn btn-primary w-25">
                   Submit
                 </button>

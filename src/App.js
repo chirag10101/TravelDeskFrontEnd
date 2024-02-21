@@ -13,7 +13,7 @@ import { UserProvider } from './UserContext';
 function App() {
   return (
     <UserProvider>
-      <div className='mainDiv'>
+      <div className='mainDiv '>
         <Home/>
       </div>
     </UserProvider>
